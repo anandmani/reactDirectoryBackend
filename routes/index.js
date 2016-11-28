@@ -112,4 +112,41 @@ router.get("/patients/v1/patientDetails", function(req, res, next) {
     }
 });
 
+//search patients by firstname
+router.get("/patients/v1/searchPatient/:firstname", function(req, res, next) {
+    try {
+            // var position = req.param('position');
+        var query = url.parse(req.url,true).query;
+        // console.log(query);
+        var position = query.position;
+        // console.log(position);
+        req.getConnection(function(err, conn) {
+            if (err) {
+                console.error('SQL Connection error: ', err);
+                return next(err);
+            } else {
+                conn.query('select * from patient_details  where firstname = "'+req.params.firstname+'"' , function(err, rows, fields) {
+                    if (err) {
+                        console.error('SQL error: ', err);
+                        return next(err);
+                    }
+                    var patient_list = [];
+                    for (var patientIndex in rows) {
+                        var patientObj = rows[patientIndex];
+                        patient_list .push(patientObj);
+                    }
+                    // res.set({'Access-Control-Allow-Origin':'*',"Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"});
+                    // res.header("Access-Control-Allow-Origin", "*");
+                    // res.header("Access-Control-Allow-Headers", "Cache-Control, Pragma, Origin, Authorization, Content-Type, X-Requested-With");
+                    // res.header("Access-Control-Allow-Methods", "GET, PUT, POST");
+                    res.json(patient_list);
+                });
+            }
+        });
+    } catch (ex) {
+        console.error("Internal error:" + ex);
+        return next(ex);
+    }
+});
+
 module.exports = router;
